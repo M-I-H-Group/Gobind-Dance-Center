@@ -273,16 +273,35 @@
       width: 100%;
       aspect-ratio: 3/4;
       object-fit: cover;
-      border-radius: 12px;
-      box-shadow: var(--shadow-card);
-      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      /* Same organic asymmetric curve as the hero image */
+      border-radius: 30% 70% 68% 32% / 32% 32% 68% 68%;
+      transition:
+        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+        border-radius 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, border-radius;
       border: 1px solid #EEEEEE;
+      /* gentle continuous float — matches hero-image treatment */
+      animation: about-img-float 7s ease-in-out infinite;
+    }
+
+    @keyframes about-img-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
     }
 
     .about-portrait:hover {
-      transform: scale(1.02);
-      box-shadow: var(--shadow-hover);
-      border-color: var(--brand-orange);
+      /* Soften corners on hover, like the hero image */
+      border-radius: 22% 22% 22% 22% / 22% 22% 22% 22%;
+      transform: translateY(-10px) scale(1.03);
+      border-color: #EEEEEE;
+      animation-play-state: paused;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .about-portrait { animation: none !important; }
+      .about-portrait:hover {
+        transform: translateY(-4px) scale(1.02);
+      }
     }
 
     /* ── Timeline ── */
@@ -683,7 +702,7 @@
           <!-- Portrait + Timeline -->
           <div class="about-sidebar">
             <div class="reveal-scale">
-              <img src="\assets\gobind1.jpg" alt="Gobind Rai portrait" class="about-portrait" loading="lazy">
+              <img src="assets/gobind1.jpg" alt="Gobind Rai portrait" class="about-portrait" loading="lazy">
             </div>
 
             <div class="reveal-scale" style="transition-delay: 0.15s;">
