@@ -265,7 +265,8 @@ function initNavbar() {
     window.__positionUnderline = positionUnderline;
   }
 
-  // ── SCROLL HANDLER ──
+  // ── SCROLL HANDLER (rAF-throttled) ──
+  let __navbarTicking = false;
   const handleScroll = () => {
     if (window.scrollY > 40) {
       navbar.classList.remove('transparent');
@@ -274,9 +275,15 @@ function initNavbar() {
       navbar.classList.add('transparent');
       navbar.classList.remove('scrolled');
     }
+    __navbarTicking = false;
   };
-
-  window.addEventListener('scroll', handleScroll, { passive: true });
+  const onScrollRaf = () => {
+    if (!__navbarTicking) {
+      window.requestAnimationFrame(handleScroll);
+      __navbarTicking = true;
+    }
+  };
+  window.addEventListener('scroll', onScrollRaf, { passive: true });
 
   // ── MOBILE MENU TOGGLE ──
   if (mobileMenuToggle) {

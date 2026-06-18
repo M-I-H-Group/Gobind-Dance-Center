@@ -15,6 +15,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Reserve scrollbar space so pages don't shift on content changes
+     (e.g. when a long section lazy-paints in). */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -25,6 +28,10 @@ body {
   background: #f1f3f5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Promote body to its own compositor layer — keeps background
+     paint cost off the main thread during scroll. */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .font-serif {
@@ -34,6 +41,23 @@ body {
 img, picture, video, canvas, svg {
   display: block;
   max-width: 100%;
+}
+
+/* ── Section-level rendering hints ──
+   content-visibility: auto skips rendering for off-screen sections,
+   which is the single biggest win for long pages on scroll. The
+   contain-intrinsic-size keeps the scrollbar stable. */
+main > section,
+main > .container > section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
+}
+
+/* Reduce motion safety net for the compositor hints above. */
+@media (prefers-reduced-motion: reduce) {
+  body { transform: none; }
+  main > section,
+  main > .container > section { content-visibility: visible; }
 }
 
 input, button, textarea, select {

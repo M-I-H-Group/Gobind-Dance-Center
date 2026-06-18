@@ -43,6 +43,29 @@ function initScrollReveal() {
 }
 
 /**
+ * rAF-throttled scroll handler — guarantees at most one update per
+ * frame regardless of how many scroll events fire. Eliminates the
+ * layout thrash that made long pages feel janky on scroll.
+ */
+function createRafScrollHandler(fn) {
+  let ticking = false;
+  let lastArgs = null;
+
+  const update = () => {
+    ticking = false;
+    fn(lastArgs);
+  };
+
+  return function (...args) {
+    lastArgs = args;
+    if (!ticking) {
+      window.requestAnimationFrame(update);
+      ticking = true;
+    }
+  };
+}
+
+/**
  * Initialize parallax effect
  */
 function initParallax() {
@@ -60,11 +83,12 @@ function initParallax() {
       const speed = parseFloat(container.dataset.speed) || 0.15;
       const offset = center * speed;
 
-      img.style.transform = `translateY(${offset}px)`;
+      // translate3d forces GPU compositing — smoother than translateY
+      img.style.transform = `translate3d(0, ${offset}px, 0)`;
     });
   };
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('scroll', createRafScrollHandler(handleScroll), { passive: true });
   handleScroll(); // Initial check
 }
 
@@ -175,7 +199,7 @@ function initScrollToTop() {
     }
   };
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('scroll', createRafScrollHandler(handleScroll), { passive: true });
 
   button.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
