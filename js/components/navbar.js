@@ -284,6 +284,11 @@ function initNavbar() {
     }
   };
   window.addEventListener('scroll', onScrollRaf, { passive: true });
+  // Run once on init so the navbar reflects the current scroll
+  // position (e.g. when the user navigates back to a mid-page
+  // position via the browser's history) without waiting for the
+  // next scroll event.
+  handleScroll();
 
   // ── MOBILE MENU TOGGLE ──
   if (mobileMenuToggle) {

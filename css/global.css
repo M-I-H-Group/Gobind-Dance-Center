@@ -28,10 +28,6 @@ body {
   background: #f1f3f5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Promote body to its own compositor layer — keeps background
-     paint cost off the main thread during scroll. */
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 .font-serif {
