@@ -398,11 +398,14 @@
             /* Modern asymmetric curve — not just a circle */
             border-radius: 32% 68% 70% 30% / 30% 30% 70% 70%;
             transition:
-                transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-                border-radius 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-            will-change: transform, border-radius;
+                transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                border-radius 1.1s cubic-bezier(0.22, 1, 0.36, 1),
+                filter 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform, border-radius, filter;
             /* gentle continuous float */
             animation: hero-img-float 7s ease-in-out infinite;
+            box-shadow: 0 12px 32px rgba(42, 58, 140, 0.08);
         }
 
         @keyframes hero-img-float {
@@ -410,17 +413,38 @@
             50%      { transform: translateY(-8px); }
         }
 
-        .hero-image-wrapper:hover .hero-image {
-            /* Soften corners on hover (still organic, but more uniform) */
+        .hero-image-wrapper:hover .hero-image,
+        .hero-image-wrapper.is-open .hero-image {
+            /* On hover (or scroll-driven open on touch): morph the organic
+               blob into a softer rounded shape, lift the image, scale it
+               slightly, and add a warm orange glow. The slower easing
+               curve makes the motion feel cinematic. */
             border-radius: 24% 24% 24% 24% / 24% 24% 24% 24%;
-            transform: translateY(-12px) scale(1.03);
+            transform: translateY(-14px) scale(1.04);
             animation-play-state: paused;
+            filter: drop-shadow(0 18px 28px rgba(228, 138, 36, 0.18))
+                    drop-shadow(0 6px 12px rgba(42, 58, 140, 0.12));
+            box-shadow:
+                0 28px 48px rgba(42, 58, 140, 0.18),
+                0 8px 16px rgba(228, 138, 36, 0.10);
         }
+
+        /* ── Touch / small screens — scroll-driven reveal ─────────
+           Phones have no hover, so instead of a continuous auto-cycle
+           the image opens (morphs + lifts + glows) while it is in the
+           center of the viewport, then contracts back once it scrolls
+           past — and the same happens in reverse when scrolling up.
+           This is driven by initHeroImageScroll() in scroll.js, which
+           toggles `.is-open` on the wrapper as the image crosses the
+           viewport midline. The `.is-open` rule above applies the
+           same styles as `:hover`. */
 
         @media (prefers-reduced-motion: reduce) {
             .hero-image { animation: none !important; }
-            .hero-image-wrapper:hover .hero-image {
+            .hero-image-wrapper:hover .hero-image,
+            .hero-image-wrapper.is-open .hero-image {
                 transform: translateY(-4px) scale(1.02);
+                filter: none;
             }
         }
 
@@ -787,13 +811,19 @@
         }
 
         .stats-item {
-            padding: 2.5rem 0.5rem;
+            padding: 2rem 0.5rem;
             text-align: center;
             border-left: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .stats-item:first-child {
             border-left: none;
+        }
+
+        @media (min-width: 480px) {
+            .stats-item {
+                padding: 2.25rem 0.75rem;
+            }
         }
 
         @media (min-width: 768px) {
@@ -822,12 +852,19 @@
         }
 
         .stats-icon svg {
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
             stroke: #E48A24;
             stroke-width: 2;
             fill: none;
             transition: transform 0.3s ease;
+        }
+
+        @media (min-width: 480px) {
+            .stats-icon svg {
+                width: 48px;
+                height: 48px;
+            }
         }
 
         @media (min-width: 768px) {
@@ -861,9 +898,17 @@
 
         .stats-value {
             font-family: var(--font-serif);
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: #FFFFFF;
             margin-bottom: 0.25rem;
+            line-height: 1.1;
+            font-weight: 600;
+        }
+
+        @media (min-width: 480px) {
+            .stats-value {
+                font-size: 2.75rem;
+            }
         }
 
         @media (min-width: 768px) {
@@ -885,10 +930,18 @@
         }
 
         .stats-label {
-            font-size: 9px;
+            font-size: 12px;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        @media (min-width: 480px) {
+            .stats-label {
+                font-size: 13px;
+            }
         }
 
         @media (min-width: 768px) {
@@ -900,6 +953,12 @@
         @media (min-width: 1920px) {
             .stats-label {
                 font-size: 11px;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            .stats-label {
+                font-size: 14px;
             }
         }
 
@@ -1602,12 +1661,19 @@
         .cta-banner-bg {
             position: absolute;
             inset: 0;
+            overflow: hidden;
         }
 
         .cta-banner-bg img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            /* Base scale — JS will smoothly interpolate from 1.0 → ~1.15
+               as the section scrolls through the viewport. */
+            transform: scale(1);
+            transform-origin: center center;
+            will-change: transform;
+            transition: transform 0.05s linear;
         }
 
         .cta-banner-overlay {
@@ -1632,6 +1698,12 @@
             margin-bottom: 1.25rem;
         }
 
+        @media (min-width: 480px) {
+            .cta-banner-title {
+                font-size: 2.3rem;
+            }
+        }
+
         @media (min-width: 768px) {
             .cta-banner-title {
                 font-size: 2.5rem;
@@ -1644,12 +1716,44 @@
             }
         }
 
+        @media (min-width: 1920px) {
+            .cta-banner-title {
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            .cta-banner-title {
+                font-size: 4rem;
+            }
+        }
+
         .cta-banner-desc {
             font-size: 16px;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.85);
             max-width: 36rem;
             margin: 0 auto 2.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .cta-banner-desc {
+                font-size: 18px;
+            }
+        }
+
+        @media (min-width: 1920px) {
+            .cta-banner-desc {
+                font-size: 19px;
+                max-width: 44rem;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            .cta-banner-desc {
+                font-size: 22px;
+                max-width: 52rem;
+            }
         }
 
         .cta-banner-actions {
@@ -1660,7 +1764,7 @@
         }
 
         .cta-banner-btn-primary {
-            font-size: 11px;
+            font-size: 12px;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             padding: 0.875rem 2rem;
@@ -1672,13 +1776,44 @@
             display: inline-block;
         }
 
+        @media (min-width: 480px) {
+            .cta-banner-btn-primary,
+            .cta-banner-btn-secondary {
+                font-size: 13px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .cta-banner-btn-primary,
+            .cta-banner-btn-secondary {
+                font-size: 14px;
+                padding: 1rem 2.25rem;
+            }
+        }
+
+        @media (min-width: 1920px) {
+            .cta-banner-btn-primary,
+            .cta-banner-btn-secondary {
+                font-size: 16px;
+                padding: 1.15rem 2.5rem;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            .cta-banner-btn-primary,
+            .cta-banner-btn-secondary {
+                font-size: 18px;
+                padding: 1.4rem 3rem;
+            }
+        }
+
         .cta-banner-btn-primary:hover {
             background: #2A3A8C;
             border-color: #2A3A8C;
         }
 
         .cta-banner-btn-secondary {
-            font-size: 11px;
+            font-size: 12px;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             padding: 0.875rem 2rem;
@@ -1728,6 +1863,152 @@
             .btn-primary::after,
             .offer-main-btn::after {
                 display: none;
+            }
+        }
+
+        /* ============================================================
+           INTERMEDIATE RESPONSIVE BREAKPOINTS
+           Fills the gap between 1024px and 1920px so 18" and 32"
+           monitors don't render at the laptop layout then snap to
+           the 1920px "2K" layout with a giant step.
+           ============================================================ */
+
+        /* 13"-15" laptops — 1280px / 1366px / 1440px viewports */
+        @media (min-width: 1280px) and (max-width: 1439px) {
+            :root {
+                --container-max: 1240px;
+            }
+
+            .hero {
+                padding: 1.25rem 0 3rem;
+            }
+
+            .hero-title {
+                font-size: clamp(4rem, 6vw, 5rem);
+            }
+
+            .hero-grid {
+                gap: 4rem;
+            }
+
+            .stats-grid {
+                padding: 0 2.5rem;
+            }
+
+            .stats-item {
+                padding: 3rem 1rem;
+            }
+
+            .stats-value {
+                font-size: 2.5rem;
+            }
+
+            .stats-label {
+                font-size: 11px;
+            }
+
+            .cta-banner {
+                padding: 8rem 0;
+            }
+
+            .cta-banner-title {
+                font-size: 3rem;
+            }
+
+            .cta-banner-desc {
+                font-size: 17px;
+                max-width: 42rem;
+            }
+        }
+
+        /* 18"-22" monitors — 1440×900 / 1680×1050 viewports */
+        @media (min-width: 1440px) and (max-width: 1919px) {
+            :root {
+                --container-max: 1380px;
+            }
+
+            .hero {
+                padding: 1.5rem 0 3.5rem;
+            }
+
+            .hero-title {
+                font-size: clamp(4.5rem, 5.5vw, 5.6rem);
+            }
+
+            .hero-grid {
+                gap: 4.5rem;
+            }
+
+            .stats-grid {
+                padding: 0 3rem;
+            }
+
+            .stats-item {
+                padding: 3.5rem 1.25rem;
+            }
+
+            .stats-value {
+                font-size: 2.75rem;
+            }
+
+            .stats-label {
+                font-size: 12px;
+            }
+
+            .cta-banner {
+                padding: 9rem 0;
+            }
+
+            .cta-banner-title {
+                font-size: 3.4rem;
+            }
+
+            .cta-banner-desc {
+                font-size: 18px;
+                max-width: 44rem;
+            }
+        }
+
+        /* 32" QHD monitors — 2560×1440 viewports (bumped earlier than 4K) */
+        @media (min-width: 2200px) and (max-width: 2559px) {
+            :root {
+                --container-max: 1700px;
+            }
+
+            .hero {
+                padding: 2rem 0 4rem;
+            }
+
+            .hero-title {
+                font-size: 6.5rem;
+            }
+
+            .stats-value {
+                font-size: 3rem;
+            }
+
+            .stats-label {
+                font-size: 13px;
+            }
+
+            .cta-banner-title {
+                font-size: 3.75rem;
+            }
+
+            .cta-banner-desc {
+                font-size: 20px;
+                max-width: 50rem;
+            }
+        }
+
+        /* Ensure containers stretch to match the screen so the stats /
+           CTA sections don't leave huge blank margins on 32" monitors. */
+        @media (min-width: 1920px) {
+            .container,
+            .container1 {
+                max-width: var(--container-max);
+                margin-left: auto;
+                margin-right: auto;
             }
         }
     </style>
@@ -1918,7 +2199,7 @@
         CTA BANNER
         ========================================================== -->
         <section class="cta-banner">
-            <div class="cta-banner-bg parallax-container" data-speed="0.1">
+            <div class="cta-banner-bg parallax-container" data-effect="zoom" data-max-zoom="1.15">
                 <img src="https://scontent.fktm3-1.fna.fbcdn.net/v/t39.30808-6/702569886_27188194700813827_8500361184010729467_n.jpg?stp=dst-jpg_tt6&amp;cstp=mx2048x1366&amp;ctp=s2048x1366&amp;_nc_cat=104&amp;ccb=1-7&amp;_nc_sid=833d8c&amp;_nc_ohc=fHQIvbfqoYQQ7kNvwFPBvh0&amp;_nc_oc=AdrvUOhrRa8hQrtxI73GDNUYPQxHuP6IE30iYjZ6dc4ZhtR5ddoiDDxjHblq-xQ-nQRDeUl6gXKDSDZg3Igps2dw&amp;_nc_zt=23&amp;_nc_ht=scontent.fktm3-1.fna&amp;_nc_gid=rV6x-PK-vuZOdNFDRI0ugw&amp;_nc_ss=7b2a8&amp;oh=00_Af_1SsESrplSL4d3gou9XAiLPUtoBXsRTxC5T4BfYOw-ZA&amp;oe=6A36BF78" alt="Dance studio" />
             </div>
             <div class="cta-banner-overlay"></div>

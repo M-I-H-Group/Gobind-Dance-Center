@@ -298,24 +298,67 @@
 
 .footer-social-link svg {
   display: block;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   position: relative;
   z-index: 1;
   transition: transform 0.3s ease;
 }
 
+/* Real brand-logo image files (YouTube, TikTok, Instagram) live in
+   assets/icons/. The PNG/AVIF sources include transparent padding
+   around the artwork, which used to show as a white halo inside the
+   dark footer. Two fixes layered together:
+
+   1. The link itself gets a white background, so the circular button
+      reads as a clean white disc against the dark footer.
+   2. The image is masked into the same circle (border-radius: 50%)
+      and `object-fit: cover` crops any inner padding, so the logo
+      fills the circle edge-to-edge — no white space outside the
+      artwork, and no awkward padding inside it. */
+.footer-social-link img.footer-social-img {
+  display: block;
+  width: 30px;
+  height: 30px;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+/* The image-bearing links get a solid white background so the
+   circular crop has no transparent edges visible against the dark
+   footer. The SVGs (Facebook, WhatsApp) keep the transparent bg +
+   outline look. We use both `:has()` (modern browsers) AND an
+   explicit modifier class (`.footer-social-link--img`) as a fallback
+   so the styling works everywhere. */
+.footer-social-link:has(img.footer-social-img),
+.footer-social-link--img {
+  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
 @media (min-width: 1920px) {
   .footer-social-link svg {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
+  }
+  .footer-social-link img.footer-social-img {
+    width: 34px;
+    height: 34px;
   }
 }
 
 @media (min-width: 2560px) {
   .footer-social-link svg {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
+  }
+  .footer-social-link img.footer-social-img {
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -327,7 +370,17 @@
   box-shadow: 0 8px 20px rgba(228, 138, 36, 0.25);
 }
 
-.footer-social-link:hover svg {
+/* Image-bearing links keep their white circular background even on
+   hover — the artwork stays clearly visible inside the orange ring
+   instead of the white circle disappearing into the orange tint. */
+.footer-social-link:has(img.footer-social-img):hover,
+.footer-social-link--img:hover {
+  background: #ffffff;
+  border-color: #E48A24;
+}
+
+.footer-social-link:hover svg,
+.footer-social-link:hover img.footer-social-img {
   transform: scale(1.1);
 }
 
@@ -756,13 +809,18 @@
   }
 
   .footer-social-link {
-    width: 36px;
-    height: 36px;
+    width: 56px;
+    height: 56px;
   }
 
   .footer-social-link svg {
-    width: 16px;
-    height: 16px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .footer-social-link img.footer-social-img {
+    width: 40px;
+    height: 40px;
   }
 
   .footer-cta {
@@ -801,5 +859,21 @@
   .footer-program-link,
   .footer-contact-text {
     font-size: 12px;
+  }
+
+  /* Brand logos stay prominent on the smallest screens. */
+  .footer-social-link {
+    width: 52px;
+    height: 52px;
+  }
+
+  .footer-social-link svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .footer-social-link img.footer-social-img {
+    width: 36px;
+    height: 36px;
   }
 }

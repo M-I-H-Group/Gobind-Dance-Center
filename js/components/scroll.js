@@ -67,6 +67,11 @@ function createRafScrollHandler(fn) {
 
 /**
  * Initialize parallax effect
+ *
+ * Two flavors, selected via `data-effect` on the .parallax-container:
+ *   - "shift" (default) — translate the image vertically (parallax).
+ *   - "zoom"            — keep the image pinned, scale it up smoothly
+ *                         as the section scrolls through the viewport.
  */
 function initParallax() {
   const parallaxContainers = document.querySelectorAll('.parallax-container');
@@ -78,13 +83,35 @@ function initParallax() {
       const img = container.querySelector('img');
       if (!img) return;
 
+      const effect = container.dataset.effect || 'shift';
       const rect = container.getBoundingClientRect();
-      const center = rect.top + rect.height / 2 - window.innerHeight / 2;
-      const speed = parseFloat(container.dataset.speed) || 0.15;
-      const offset = center * speed;
+      const vh = window.innerHeight;
 
-      // translate3d forces GPU compositing — smoother than translateY
-      img.style.transform = `translate3d(0, ${offset}px, 0)`;
+      if (effect === 'zoom') {
+        // Progress: 0 when the section is fully below the viewport,
+        //           1 when it has fully scrolled past the top.
+        // We also account for the section being inside the viewport so
+        // the zoom is visible while the user is looking at it.
+        const totalScroll = rect.height + vh;
+        const traveled = vh - rect.top;
+        const progress = Math.max(0, Math.min(1, traveled / totalScroll));
+
+        // Ease the progress so the zoom feels natural — slow start,
+        // noticeable in the middle, slow finish.
+        const eased = progress < 0.5
+          ? 2 * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+        const maxZoom = parseFloat(container.dataset.maxZoom) || 1.18;
+        const scale = 1 + (maxZoom - 1) * eased;
+        img.style.transform = `translate3d(0, 0, 0) scale(${scale})`;
+      } else {
+        // Classic vertical parallax translate.
+        const center = rect.top + rect.height / 2 - vh / 2;
+        const speed = parseFloat(container.dataset.speed) || 0.15;
+        const offset = center * speed;
+        img.style.transform = `translate3d(0, ${offset}px, 0)`;
+      }
     });
   };
 
@@ -210,6 +237,65 @@ function initScrollToTop() {
 }
 
 /**
+ * Initialize scroll-driven hero image reveal.
+ *
+ * On touch devices (no hover) and small screens, the hero image's
+ * hover-state (morph + lift + glow) is replicated as a scroll-driven
+ * animation instead of an auto-cycle:
+ *
+ *   - Scroll DOWN past the hero  → image opens as it enters the
+ *                                  center of the viewport, then
+ *                                  contracts once it scrolls past.
+ *   - Scroll UP past the hero    → same behavior, mirrored.
+ *
+ * The "open zone" is the middle 60% of the viewport. When the
+ * image's vertical center falls inside that zone, the wrapper
+ * gets `.is-open`, which triggers the same styles as `:hover`.
+ *
+ * On large screens this is harmless — the hover handler still wins
+ * for desktop users; the scroll handler just stays a no-op because
+ * the wrapper isn't in the small-screen layout path.
+ */
+function initHeroImageScroll() {
+  const wrappers = document.querySelectorAll('.hero-image-wrapper');
+  if (wrappers.length === 0) return;
+
+  // Skip on large screens with a real pointer — hover already works.
+  // `hover: hover` matches laptops/desktops/TVs; everything else (touch
+  // laptops, phones, tablets) gets the scroll-driven effect.
+  const prefersHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const isWideScreen = window.matchMedia('(min-width: 1024px)').matches;
+  if (prefersHover && isWideScreen) return;
+
+  // Each wrapper gets its own ticking handler. We measure progress as
+  // a 0..1 ratio: 0 when the image's center is at the bottom of the
+  // viewport, 1 when it has scrolled past the top. The "open" range
+  // is 0.15..0.85 (the middle 70% of the page).
+  const update = (wrapper) => {
+    const rect = wrapper.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const center = rect.top + rect.height / 2;
+    // progress: 0 when the image just entered from the bottom,
+    //           1 when it just left through the top.
+    const progress = 1 - (center / vh);
+    if (progress > 0.15 && progress < 0.85) {
+      wrapper.classList.add('is-open');
+    } else {
+      wrapper.classList.remove('is-open');
+    }
+  };
+
+  const handleScroll = () => {
+    wrappers.forEach(update);
+  };
+
+  // rAF-throttle just like the parallax handler so we don't thrash.
+  window.addEventListener('scroll', createRafScrollHandler(handleScroll), { passive: true });
+  window.addEventListener('resize', createRafScrollHandler(handleScroll), { passive: true });
+  handleScroll(); // Initial check so the state is right on load.
+}
+
+/**
  * Initialize all scroll utilities
  */
 function initScroll() {
@@ -218,6 +304,7 @@ function initScroll() {
   initCountUp();
   initTextReveal();
   initScrollToTop();
+  initHeroImageScroll();
 }
 
 // Run when DOM is ready
@@ -234,3 +321,4 @@ window.initParallax = initParallax;
 window.initCountUp = initCountUp;
 window.initTextReveal = initTextReveal;
 window.initScrollToTop = initScrollToTop;
+window.initHeroImageScroll = initHeroImageScroll;
