@@ -1572,8 +1572,8 @@
 
         .testimonial-avatar {
             flex-shrink: 0;
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
@@ -1592,6 +1592,27 @@
             position: relative;
             overflow: hidden;
             will-change: transform;
+        }
+
+        /* When the avatar contains a real photo (img element), the
+           container is a perfect circle and the image fills it edge to
+           edge — no letterboxing, no stretching. */
+        .testimonial-avatar img.testimonial-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            display: block;
+            border-radius: 50%;
+        }
+
+        /* Placeholder SVG silhouette — fills the whole circle with a
+           head + shoulders shape in white at 95% opacity so it reads
+           as a friendly "person" icon on top of the brand gradient. */
+        .testimonial-avatar svg.testimonial-avatar-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         .testimonial-card:hover .testimonial-avatar {
@@ -2160,7 +2181,17 @@
                         <span class="testimonial-quote">&ldquo;</span>
                         <p class="testimonial-text">Gobind sir shaped my understanding of screen presence. Every movement he taught carried meaning beyond technique.</p>
                         <div class="testimonial-author">
-                            <span class="testimonial-avatar avatar-1" aria-hidden="true">RT</span>
+                            <span class="testimonial-avatar avatar-1" aria-hidden="true">
+                                <!-- Placeholder avatar silhouette. Swap with:
+                                     <img src="assets/images/rekha.jpg"
+                                          alt="Rekha Thapa"
+                                          class="testimonial-avatar-img" />
+                                     when a real photo is available. -->
+                                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="testimonial-avatar-svg" aria-hidden="true">
+                                    <circle cx="24" cy="17" r="8" fill="rgba(255,255,255,0.95)"/>
+                                    <path d="M8 44c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(255,255,255,0.95)"/>
+                                </svg>
+                            </span>
                             <div class="testimonial-author-text">
                                 <p class="testimonial-author-name">Rekha Thapa</p>
                                 <p class="testimonial-author-role">Actress &amp; Producer</p>
@@ -2172,7 +2203,17 @@
                         <span class="testimonial-quote">&ldquo;</span>
                         <p class="testimonial-text">The Angel Kalakendra was where I discovered that dance is not performance — it is conversation. Guru Gobind gave me that language.</p>
                         <div class="testimonial-author">
-                            <span class="testimonial-avatar avatar-2" aria-hidden="true">AL</span>
+                            <span class="testimonial-avatar avatar-2" aria-hidden="true">
+                                <!-- Placeholder avatar silhouette. Swap with:
+                                     <img src="assets/images/arunima.jpg"
+                                          alt="Arunima Lamsal"
+                                          class="testimonial-avatar-img" />
+                                     when a real photo is available. -->
+                                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="testimonial-avatar-svg" aria-hidden="true">
+                                    <circle cx="24" cy="17" r="8" fill="rgba(255,255,255,0.95)"/>
+                                    <path d="M8 44c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(255,255,255,0.95)"/>
+                                </svg>
+                            </span>
                             <div class="testimonial-author-text">
                                 <p class="testimonial-author-name">Arunima Lamsal</p>
                                 <p class="testimonial-author-role">Film Artist</p>
@@ -2184,7 +2225,17 @@
                         <span class="testimonial-quote">&ldquo;</span>
                         <p class="testimonial-text">Moving to NYC, I feared losing touch with my culture. GDA gave me roots in a foreign city. Every class feels like home.</p>
                         <div class="testimonial-author">
-                            <span class="testimonial-avatar avatar-3" aria-hidden="true">PS</span>
+                            <span class="testimonial-avatar avatar-3" aria-hidden="true">
+                                <!-- Placeholder avatar silhouette. Swap with:
+                                     <img src="assets/images/priya.jpg"
+                                          alt="Priya Sharma"
+                                          class="testimonial-avatar-img" />
+                                     when a real photo is available. -->
+                                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="testimonial-avatar-svg" aria-hidden="true">
+                                    <circle cx="24" cy="17" r="8" fill="rgba(255,255,255,0.95)"/>
+                                    <path d="M8 44c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="rgba(255,255,255,0.95)"/>
+                                </svg>
+                            </span>
                             <div class="testimonial-author-text">
                                 <p class="testimonial-author-name">Priya Sharma</p>
                                 <p class="testimonial-author-role">GDA Student, NYC</p>
